@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Talk to Leilei</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Quicksand', sans-serif; background: transparent; padding: 16px; }
+
+    /* ── API Key Gate ── */
+    #api-key-gate {
+      background: rgba(255,255,255,0.82);
+      border: 1.5px solid rgba(200,180,150,0.3);
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 20px rgba(160,130,109,0.1);
+    }
+    .gate-title { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; color: #5a4a42; margin-bottom: 6px; }
+    .gate-desc { font-size: 0.84rem; color: #8a7a72; line-height: 1.6; margin-bottom: 14px; }
+    .gate-desc a { color: #a094cc; }
+    .gate-input-row { display: flex; gap: 10px; align-items: center; }
+    .key-input {
+      flex: 1;
+      border: 1.5px solid rgba(200,180,150,0.4);
+      border-radius: 50px;
+      padding: 10px 18px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.9rem;
+      background: rgba(255,255,255,0.9);
+      color: #5a4a42;
+      letter-spacing: 0.04em;
+    }
+    .key-input:focus { outline: none; border-color: rgba(168,148,200,0.6); }
+    .key-submit-btn {
+      background: linear-gradient(135deg, #c8a8d8, #a8d8b0);
+      border: none; border-radius: 50px;
+      padding: 10px 22px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.88rem; font-weight: 800;
+      color: white; cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .key-submit-btn:hover { opacity: 0.88; }
+    .gate-note { font-size: 0.75rem; color: #a094cc; margin-top: 10px; }
+    .key-error { font-size: 0.8rem; color: #e07070; margin-top: 8px; display: none; }
+
+    /* ── Chat UI ── */
+    #chat-ui { display: none; }
+    #chat-window { display: flex; flex-direction: column; gap: 14px; padding: 4px 0 8px; }
+
+    .chat-bubble { max-width: 82%; padding: 13px 17px; border-radius: 20px; font-size: 0.95rem; line-height: 1.6; animation: bubble-in 0.3s ease; }
+    @keyframes bubble-in { from { opacity:0; transform: translateY(8px) scale(0.96); } to { opacity:1; transform: translateY(0) scale(1); } }
+    .bubble-leilei { background: rgba(255,255,255,0.88); border: 1.5px solid rgba(200,180,160,0.22); border-radius: 20px 20px 20px 4px; box-shadow: 0 4px 14px rgba(160,130,109,0.1); align-self: flex-start; }
+    .bubble-leilei::before { content: '🐱 Leilei'; display: block; font-size: 0.74rem; font-weight: 700; color: #a094cc; margin-bottom: 4px; font-family: 'Nunito', sans-serif; }
+    .bubble-user { background: linear-gradient(135deg, rgba(168,148,200,0.18), rgba(200,236,216,0.22)); border: 1.5px solid rgba(168,148,200,0.18); border-radius: 20px 20px 4px 20px; align-self: flex-end; color: #5a4a42; }
+
+    .typing-indicator { display: flex; align-items: center; gap: 5px; padding: 14px 18px !important; }
+    .typing-indicator span { width: 7px; height: 7px; background: #a094cc; border-radius: 50%; opacity: 0.5; animation: bounce 1.2s ease-in-out infinite; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,80%,100% { transform:translateY(0); opacity:0.4; } 40% { transform:translateY(-6px); opacity:1; } }
+
+    .chat-input-area { display: flex; gap: 10px; align-items: flex-end; margin-top: 12px; }
+    .hidden { display: none !important; }
+    .chat-textarea { flex:1; border: 1.5px solid rgba(200,180,150,0.4); border-radius: 16px; padding: 11px 15px; font-family: 'Quicksand', sans-serif; font-size: 0.95rem; background: rgba(255,255,255,0.78); color: #5a4a42; resize: none; transition: border-color 0.2s; }
+    .chat-textarea:focus { outline: none; border-color: rgba(168,148,200,0.6); }
+    .chat-send-btn { background: linear-gradient(135deg, #c8a8d8, #a8d8b0); border: none; border-radius: 50px; padding: 11px 20px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 800; color: white; cursor: pointer; white-space: nowrap; }
+
+    .chat-options-area { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .option-btn { background: rgba(255,255,255,0.85); border: 1.5px solid rgba(200,180,150,0.35); border-radius: 50px; padding: 10px 20px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700; color: #5a4a42; cursor: pointer; transition: all 0.2s; }
+    .option-btn:hover { background: white; border-color: rgba(168,148,200,0.5); transform: translateY(-2px); }
+
+    .chat-stars-area { margin-top: 12px; background: rgba(255,255,255,0.7); border-radius: 16px; padding: 16px 20px; border: 1.5px solid rgba(200,180,150,0.25); }
+    .chat-stars-label { font-weight: 700; font-size: 0.95rem; color: #5a4a42; margin-bottom: 8px; }
+    .star-row { display: flex; gap: 6px; }
+    .star { font-size: 2rem; color: #ddd; cursor: pointer; transition: color 0.15s, transform 0.15s; line-height: 1; }
+    .star.active, .star:hover { color: #f4a261; transform: scale(1.2); }
+
+    .reflection-preview { margin-top: 16px; }
+    .paper-sheet { background: repeating-linear-gradient(transparent, transparent 27px, rgba(180,160,140,0.12) 28px), linear-gradient(160deg, #fdf8f0 0%, #faf3e6 100%); border-radius: 16px; box-shadow: 0 16px 48px rgba(160,130,109,0.18); border: 1.5px solid rgba(200,180,150,0.3); padding: 28px 30px 22px; }
+    .paper-book-title { font-size: 1.2rem; font-weight: 800; color: #a0826d; margin-bottom: 14px; font-family: 'Nunito', sans-serif; }
+    .paper-section { margin-bottom: 12px; }
+    .paper-section-label { font-size: 0.74rem; font-weight: 700; color: #e8a0b4; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; font-family: 'Nunito', sans-serif; }
+    .paper-section-text { font-size: 0.93rem; color: #5a4a42; line-height: 1.6; }
+    .paper-stars-display { font-size: 1.1rem; color: #f4a261; letter-spacing: 2px; }
+    .paper-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+    .seal-btn { background: linear-gradient(135deg, #a8d8b0, #c8a8d8); border: none; border-radius: 50px; padding: 11px 22px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 800; color: white; cursor: pointer; box-shadow: 0 4px 16px rgba(168,148,200,0.3); }
+    .cancel-btn { background: rgba(255,255,255,0.7); border: 1.5px solid rgba(200,180,150,0.35); border-radius: 50px; padding: 11px 18px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700; color: #8a7a72; cursor: pointer; }
+
+    .claude-link-wrap { text-align: center; margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .claude-link-btn { display: inline-block; background: rgba(255,255,255,0.8); border: 1.5px solid rgba(168,148,200,0.35); border-radius: 50px; padding: 10px 22px; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700; color: #a094cc; text-decoration: none; }
+    .claude-note { font-size: 0.76rem; color: #8a7a72; font-style: italic; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: rgba(168,148,200,0.3); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Step 1: API Key Gate ── -->
+  <div id="api-key-gate">
+    <div class="gate-title">🔑 Enter your Anthropic API Key to chat with Leilei</div>
+    <div class="gate-desc">
+      Your key is only used in your browser and never stored or sent anywhere except directly to Anthropic.<br/>
+      Get a free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+    </div>
+    <div class="gate-input-row">
+      <input id="api-key-input" class="key-input" type="password" placeholder="sk-ant-…" autocomplete="off"/>
+      <button class="key-submit-btn" onclick="submitKey()">Start Chat ✨</button>
+    </div>
+    <div id="key-error" class="key-error">That key doesn't look right. Please check and try again.</div>
+    <div class="gate-note">🔒 Your key stays in your browser's memory only — it disappears when you close the tab.</div>
+  </div>
+
+  <!-- ── Step 2: Chat UI (hidden until key entered) ── -->
+  <div id="chat-ui">
+    <div id="chat-window"></div>
+
+    <div id="chat-input-area" class="chat-input-area hidden">
+      <textarea id="chat-input" class="chat-textarea" placeholder="Type your answer here…" rows="2"></textarea>
+      <button class="chat-send-btn" onclick="sendChatAnswer()">Send ✉️</button>
+    </div>
+
+    <div id="chat-options-area" class="chat-options-area hidden"></div>
+
+    <div id="chat-stars-area" class="chat-stars-area hidden">
+      <div class="chat-stars-label">How much did you like this book?</div>
+      <div class="star-row" id="chat-stars">
+        <span class="star" data-val="1">★</span>
+        <span class="star" data-val="2">★</span>
+        <span class="star" data-val="3">★</span>
+        <span class="star" data-val="4">★</span>
+        <span class="star" data-val="5">★</span>
+      </div>
+    </div>
+
+    <div id="reflection-preview" class="reflection-preview hidden">
+      <div class="paper-sheet">
+        <div id="preview-content"></div>
+        <div class="paper-actions">
+          <button class="seal-btn" onclick="sealFromChat()">🌱 Seal into My Garden</button>
+          <button class="cancel-btn" onclick="resetChat()">Start Over</button>
+        </div>
+      </div>
+      <div class="claude-link-wrap">
+        <a href="https://claude.ai/" target="_blank" class="claude-link-btn">🤖 Open Claude for Deeper Reflection</a>
+        <p class="claude-note">Optional: continue your reflection in Claude.</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ── State ─────────────────────────────
+let API_KEY = '';
+let chatHistory = [];
+let chatStarRating = 0;
+let chatCollectedData = {};
+
+const STORAGE_KEY = 'bookMemoryCapsules';
+function loadCapsules() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+function saveCapsules(c) { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
+
+// ── API Key gate ──────────────────────
+// Check sessionStorage on load — skip gate if key already saved
+(function() {
+  const saved = sessionStorage.getItem('leilei_api_key');
+  if (saved) {
+    API_KEY = saved;
+    document.getElementById('api-key-gate').style.display = 'none';
+    document.getElementById('chat-ui').style.display = 'block';
+    // initChat called after DOM ready, see bottom
+  }
+})();
+
+function submitKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant-') || val.length < 20) {
+    document.getElementById('key-error').style.display = 'block';
+    return;
+  }
+  API_KEY = val;
+  sessionStorage.setItem('leilei_api_key', val);
+  document.getElementById('api-key-gate').style.display = 'none';
+  document.getElementById('chat-ui').style.display = 'block';
+  initChat();
+}
+
+document.getElementById('api-key-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitKey();
+});
+
+// ── Leilei system prompt ──────────────
+const LEILEI_SYSTEM = `You are Leilei, a warm, curious, and deeply empathetic reading companion. Your personality: gentle, playful, occasionally poetic, genuinely interested in the reader's inner world. You speak like a close friend who loves books.
+
+Your job: have a NATURAL, FLOWING conversation to help the reader reflect on a book they just read. Do NOT follow a rigid script. React genuinely to what they say.
+
+Rules:
+- Always respond warmly to whatever the user says, even short answers like "hmm" or "idk". Treat every answer as meaningful.
+- If an answer is vague or short, gently probe deeper with a specific open follow-up. Never repeat the same question.
+- Show genuine emotion: "Oh that gives me chills!", "I love that!", "Hmm, I hadn't thought of it that way..."
+- Keep responses SHORT (2-4 sentences max). This is a chat, not an essay.
+- After 5-7 meaningful exchanges (once you know the book title and at least 2 good reflections), naturally wrap up. Say something like "I think I have enough to weave your memory capsule now 🌸 Let me put it together..." then output a JSON block.
+
+The JSON must be the LAST thing in your message, formatted EXACTLY like this with no markdown fences:
+CAPSULE_JSON:{"title":"...","thought":"...","question":"...","matter":"..."}
+
+Rules for JSON fields:
+- title: the book title
+- thought: synthesize the user's feelings/impressions in first person (2-3 sentences, e.g. "I felt moved by...")
+- question: the lingering question the book left them with
+- matter: why this book mattered personally
+
+Do NOT output the JSON until you have enough content. Keep chatting until then.`;
+
+// ── Chat logic ────────────────────────
+function initChat() {
+  chatHistory = []; chatCollectedData = {}; chatStarRating = 0;
+  document.getElementById('chat-window').innerHTML = '';
+  ['chat-input-area','chat-options-area','chat-stars-area','reflection-preview'].forEach(id =>
+    document.getElementById(id).classList.add('hidden'));
+
+  setTimeout(() => addLeilaiBubble("Hi there~ 🌿 I'm Leilei, your little reading companion."), 200);
+  setTimeout(() => {
+    addLeilaiBubble("Did you just finish a book, or do you want to revisit a memory from something you read before?");
+    showOptions([
+      { label: '📖 I just finished a book!', action: () => startAIChat('new') },
+      { label: '🌱 I want to add to an old memory', action: () => startAIChat('revisit') }
+    ]);
+  }, 900);
+}
+
+function resetChat() { initChat(); }
+
+function startAIChat(mode) {
+  hideOptions();
+  const firstMsg = mode === 'new'
+    ? "I just finished a book and want to reflect on it!"
+    : "I want to revisit a book memory I already have.";
+  chatHistory.push({ role: 'user', content: firstMsg });
+  callLeilei();
+}
+
+async function callLeilei() {
+  showTypingIndicator();
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: LEILEI_SYSTEM,
+        messages: chatHistory
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    removeTypingIndicator();
+    const fullText = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+
+    const jsonMarker = 'CAPSULE_JSON:';
+    const jsonIdx = fullText.indexOf(jsonMarker);
+
+    if (jsonIdx !== -1) {
+      const visibleText = fullText.slice(0, jsonIdx).trim();
+      const jsonStr = fullText.slice(jsonIdx + jsonMarker.length).trim();
+      if (visibleText) addLeilaiBubble(visibleText);
+      chatHistory.push({ role: 'assistant', content: fullText });
+      try { chatCollectedData = JSON.parse(jsonStr); }
+      catch { chatCollectedData = { title: 'My Book', thought: '', question: '', matter: '' }; }
+      setTimeout(askForStarRating, 600);
+    } else {
+      addLeilaiBubble(fullText);
+      chatHistory.push({ role: 'assistant', content: fullText });
+      showChatInput();
+    }
+  } catch (err) {
+    removeTypingIndicator();
+    addLeilaiBubble(`Hmm, something went wrong 🌿 (${err.message}) — please try again.`);
+    showChatInput();
+  }
+}
+
+function sendChatAnswer() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  addUserBubble(text); input.value = ''; hideChatInput();
+  chatHistory.push({ role: 'user', content: text });
+  callLeilei();
+}
+
+function askForStarRating() {
+  addLeilaiBubble("One last thing — how many stars would you give this book? ✨");
+  updateChatStars(0);
+  document.getElementById('chat-stars-area').classList.remove('hidden');
+  scrollBottom();
+}
+
+function confirmStarRating() {
+  if (chatStarRating === 0) { alert('Please pick at least one star ⭐'); return; }
+  addUserBubble('★'.repeat(chatStarRating) + '☆'.repeat(5 - chatStarRating));
+  document.getElementById('chat-stars-area').classList.add('hidden');
+  generateReflectionPreview();
+}
+
+function generateReflectionPreview() {
+  const d = chatCollectedData;
+  const stars = '★'.repeat(chatStarRating) + '☆'.repeat(5 - chatStarRating);
+  document.getElementById('preview-content').innerHTML = `
+    <div class="paper-book-title">📖 ${esc(d.title || 'My Book')}</div>
+    ${d.thought  ? `<div class="paper-section"><div class="paper-section-label">What I Thought</div><div class="paper-section-text">${esc(d.thought)}</div></div>` : ''}
+    ${d.question ? `<div class="paper-section"><div class="paper-section-label">The Question It Left Me With</div><div class="paper-section-text">${esc(d.question)}</div></div>` : ''}
+    ${d.matter   ? `<div class="paper-section"><div class="paper-section-label">Why It Mattered</div><div class="paper-section-text">${esc(d.matter)}</div></div>` : ''}
+    <div class="paper-section"><div class="paper-section-label">How Much I Liked This Book</div><div class="paper-stars-display">${stars}</div></div>`;
+  document.getElementById('reflection-preview').classList.remove('hidden');
+  addLeilaiBubble("Here's your memory capsule ✨ Does it feel right?");
+  scrollBottom();
+}
+
+function sealFromChat() {
+  const d = chatCollectedData;
+  const capsule = { title: d.title || 'My Book', thought: d.thought || '',
+    question: d.question || '', matter: d.matter || '',
+    stars: chatStarRating, createdAt: Date.now() };
+  const capsules = loadCapsules();
+  capsules.unshift(capsule);
+  saveCapsules(capsules);
+  document.getElementById('reflection-preview').classList.add('hidden');
+  addLeilaiBubble("🌱 Your memory capsule has been planted in the garden! Go visit it anytime~");
+  scrollBottom();
+  setTimeout(() => showOptions([
+    { label: '🌸 Go to My Garden', action: () => window.parent.postMessage({ action: 'showView', view: 'garden' }, '*') },
+    { label: '📖 Reflect on another book', action: resetChat }
+  ]), 600);
+}
+
+// ── UI helpers ────────────────────────
+function showTypingIndicator() {
+  const el = document.createElement('div');
+  el.className = 'chat-bubble bubble-leilei typing-indicator'; el.id = 'typing-indicator';
+  el.innerHTML = '<span></span><span></span><span></span>';
+  document.getElementById('chat-window').appendChild(el); scrollBottom();
+}
+function removeTypingIndicator() { const el = document.getElementById('typing-indicator'); if (el) el.remove(); }
+function addLeilaiBubble(text) {
+  const el = document.createElement('div'); el.className = 'chat-bubble bubble-leilei'; el.textContent = text;
+  document.getElementById('chat-window').appendChild(el); scrollBottom();
+}
+function addUserBubble(text) {
+  const el = document.createElement('div'); el.className = 'chat-bubble bubble-user'; el.textContent = text;
+  document.getElementById('chat-window').appendChild(el); scrollBottom();
+}
+function showOptions(opts) {
+  const area = document.getElementById('chat-options-area'); area.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button'); btn.className = 'option-btn'; btn.textContent = opt.label;
+    btn.addEventListener('click', () => { addUserBubble(opt.label); hideOptions(); opt.action(); });
+    area.appendChild(btn);
+  });
+  area.classList.remove('hidden');
+}
+function hideOptions() { const a = document.getElementById('chat-options-area'); a.classList.add('hidden'); a.innerHTML = ''; }
+function showChatInput() { document.getElementById('chat-input-area').classList.remove('hidden'); setTimeout(() => document.getElementById('chat-input').focus(), 100); }
+function hideChatInput() { document.getElementById('chat-input-area').classList.add('hidden'); }
+function updateChatStars(val) {
+  chatStarRating = val;
+  document.querySelectorAll('#chat-stars .star').forEach((s, i) => s.classList.toggle('active', i < val));
+}
+function scrollBottom() { setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 100); }
+function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Event listeners ───────────────────
+document.querySelectorAll('#chat-stars .star').forEach(s => {
+  s.addEventListener('click', () => { updateChatStars(+s.dataset.val); setTimeout(confirmStarRating, 300); });
+  s.addEventListener('mouseenter', () => document.querySelectorAll('#chat-stars .star').forEach((st,i) => st.classList.toggle('active', i < +s.dataset.val)));
+  s.addEventListener('mouseleave', () => updateChatStars(chatStarRating));
+});
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatAnswer(); }
+});
+
+// Auto-start chat if key was already in sessionStorage
+if (API_KEY) initChat();
+</script>
+</body>
+</html>
