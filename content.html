@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Memory Capsule – Garden Map</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body class="map-page">
+
+  <!-- ═══ MAP VIEW ═══ -->
+  <div id="view-map" class="view active">
+    <div class="map-bg" style="background-image:url('map.png')"></div>
+    <div class="map-overlay-light"></div>
+
+    <header class="map-header">
+      <div class="map-header-inner">
+        <span class="map-logo">🌿 Book Memory Capsule</span>
+      </div>
+    </header>
+
+    <!-- Clickable Regions -->
+    <!-- Green Garden (upper-left) -->
+    <div class="map-region region-garden" onclick="showView('garden')" title="My Memory Capsule Garden">
+      <div class="region-label">
+        <span class="region-icon">🌱</span>
+        <span>My Memory<br/>Capsule Garden</span>
+      </div>
+    </div>
+
+    <!-- Pink area (right) -->
+    <div class="map-region region-friends" onclick="showComingSoon()" title="Visit Friends' Memory Capsule">
+      <div class="region-label">
+        <span class="region-icon">🚀</span>
+        <span>Visit Friends'<br/>Memory Capsule</span>
+      </div>
+    </div>
+
+    <!-- Yellow area (bottom-right) – Talk to Leilei -->
+    <div class="map-region region-leilei" onclick="showView('leilei')" title="Talk to Leilei">
+      <div class="region-label">
+        <span class="region-icon">🐱</span>
+        <span>Talk to<br/>Leilei</span>
+      </div>
+    </div>
+
+    <footer class="map-footer">
+      <p>Save what a book meant to you before the feeling fades.</p>
+    </footer>
+  </div>
+
+  <!-- ═══ GARDEN VIEW ═══ -->
+  <div id="view-garden" class="view">
+    <div class="garden-bg"></div>
+
+    <div class="view-header">
+      <button class="back-btn" onclick="showView('map')">← Back to Map</button>
+      <h2 class="view-title">🌸 My Memory Capsule Garden</h2>
+      <button class="new-memory-btn" onclick="showForm()">＋ Write a New Memory</button>
+    </div>
+
+    <div id="garden-content" class="garden-content">
+      <!-- capsules rendered by JS -->
+    </div>
+
+    <!-- Paper unfold overlay -->
+    <div id="paper-modal" class="paper-modal hidden">
+      <div class="paper-backdrop" onclick="closePaper()"></div>
+      <div class="paper-wrap">
+        <div class="paper-sheet">
+          <div class="paper-texture"></div>
+          <div class="paper-inner" id="paper-inner-content"></div>
+          <div class="paper-actions">
+            <button class="paper-btn copy-btn" onclick="copyReflection()">📋 Copy</button>
+            <button class="paper-btn delete-btn" onclick="deleteCurrentCapsule()">🗑 Delete</button>
+            <button class="paper-btn close-paper-btn" onclick="closePaper()">Close ✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Memory Form -->
+    <div id="form-modal" class="paper-modal hidden">
+      <div class="paper-backdrop" onclick="closeForm()"></div>
+      <div class="paper-wrap">
+        <div class="paper-sheet form-sheet">
+          <div class="paper-texture"></div>
+          <h3 class="form-title">✨ Create a New Book Memory Capsule</h3>
+          <div class="form-fields">
+            <label>Book Title <span class="required">*</span>
+              <input id="f-title" type="text" placeholder="e.g. The Little Prince" class="diary-input"/>
+            </label>
+            <label>What I Thought
+              <textarea id="f-thought" placeholder="What stayed with you most after reading it?" class="diary-input diary-textarea"></textarea>
+            </label>
+            <label>What I Felt
+              <textarea id="f-felt" placeholder="What emotions did this book bring out in you?" class="diary-input diary-textarea"></textarea>
+            </label>
+            <label>What Was Good / Not So Good
+              <textarea id="f-good" placeholder="What did you enjoy or didn't enjoy about this book?" class="diary-input diary-textarea"></textarea>
+            </label>
+            <label>Favorite Character(s) or Moment
+              <textarea id="f-favorite" placeholder="A character, scene, or line that you can't forget?" class="diary-input diary-textarea"></textarea>
+            </label>
+            <label>How Much I Liked This Book
+              <div class="star-row" id="form-stars">
+                <span class="star" data-val="1">★</span>
+                <span class="star" data-val="2">★</span>
+                <span class="star" data-val="3">★</span>
+                <span class="star" data-val="4">★</span>
+                <span class="star" data-val="5">★</span>
+              </div>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="seal-btn" onclick="sealMemory()">💊 Seal This Memory</button>
+            <button class="cancel-btn" onclick="closeForm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success toast -->
+    <div id="success-toast" class="success-toast hidden">
+      🌱 Your book memory has been planted in the garden.
+    </div>
+  </div>
+
+  <!-- ═══ LEILEI CHAT VIEW ═══ -->
+  <div id="view-leilei" class="view">
+    <div class="leilei-bg"></div>
+    <div class="view-header leilei-header">
+      <button class="back-btn" onclick="showView('map')">← Back to Map</button>
+      <div class="leilei-title-wrap">
+        <h2 class="view-title">🐾 Talk to Leilei</h2>
+        <p class="leilei-subtitle">Let Leilei ask gentle questions and help you turn your thoughts into a memory capsule.</p>
+      </div>
+    </div>
+    <div class="leilei-wrap">
+      <iframe id="leilei-iframe" src="leilei-chat.html" class="leilei-iframe" frameborder="0" scrolling="yes" title="Talk to Leilei"></iframe>
+    </div>
+  </div>
+
+  <!-- ═══ COMING SOON MODAL ═══ -->
+  <div id="coming-soon-modal" class="paper-modal hidden">
+    <div class="paper-backdrop" onclick="closeComingSoon()"></div>
+    <div class="paper-wrap small-wrap">
+      <div class="paper-sheet">
+        <div class="paper-texture"></div>
+        <div class="coming-soon-inner">
+          <div class="coming-soon-icon">🚀</div>
+          <h3>Visit Friends' Memory Capsule</h3>
+          <div class="coming-soon-badge">Coming Soon</div>
+          <p>In the future, you will be able to visit other readers' memory gardens and explore the reflections they choose to share.</p>
+          <button class="seal-btn" onclick="closeComingSoon()">Close ✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CUSTOM CONFIRM MODAL ═══ -->
+  <div id="confirm-modal" class="paper-modal hidden">
+    <div class="paper-backdrop"></div>
+    <div class="paper-wrap small-wrap">
+      <div class="paper-sheet">
+        <div class="paper-texture"></div>
+        <div class="coming-soon-inner">
+          <div class="coming-soon-icon">🗑</div>
+          <p id="confirm-message" style="color:#5a4a42;line-height:1.6;"></p>
+          <div style="display:flex;gap:12px;margin-top:8px;">
+            <button class="seal-btn" id="confirm-yes" style="background:linear-gradient(135deg,#e07070,#c05050);">Delete</button>
+            <button class="cancel-btn" id="confirm-no">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

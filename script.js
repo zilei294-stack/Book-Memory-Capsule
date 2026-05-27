@@ -116,8 +116,9 @@ function openPaper(index) {
   document.getElementById('paper-inner-content').innerHTML = `
     <div class="paper-book-title">📖 ${escHtml(cap.title)}</div>
     ${cap.thought   ? `<div class="paper-section"><div class="paper-section-label">What I Thought</div><div class="paper-section-text">${escHtml(cap.thought)}</div></div>` : ''}
-    ${cap.question  ? `<div class="paper-section"><div class="paper-section-label">The Question It Left Me With</div><div class="paper-section-text">${escHtml(cap.question)}</div></div>` : ''}
-    ${cap.matter    ? `<div class="paper-section"><div class="paper-section-label">Why It Mattered</div><div class="paper-section-text">${escHtml(cap.matter)}</div></div>` : ''}
+    ${cap.felt      ? `<div class="paper-section"><div class="paper-section-label">What I Felt</div><div class="paper-section-text">${escHtml(cap.felt)}</div></div>` : ''}
+    ${cap.good      ? `<div class="paper-section"><div class="paper-section-label">What Was Good / Not So Good</div><div class="paper-section-text">${escHtml(cap.good)}</div></div>` : ''}
+    ${cap.favorite  ? `<div class="paper-section"><div class="paper-section-label">Favorite Character(s) or Moment</div><div class="paper-section-text">${escHtml(cap.favorite)}</div></div>` : ''}
     <div class="paper-section"><div class="paper-section-label">How Much I Liked This Book</div><div class="paper-stars-display">${stars}</div></div>`;
   document.getElementById('paper-modal').classList.remove('hidden');
 }
@@ -172,7 +173,7 @@ function showConfirm(message, onYes) {
 
 function showForm() {
   formStarRating = 0;
-  ['f-title','f-thought','f-question','f-matter'].forEach(id => document.getElementById(id).value = '');
+  ['f-title','f-thought','f-felt','f-good','f-favorite'].forEach(id => document.getElementById(id).value = '');
   updateFormStars(0);
   document.getElementById('form-modal').classList.remove('hidden');
 }
@@ -182,8 +183,9 @@ function sealMemory() {
   const title = document.getElementById('f-title').value.trim();
   if (!title) { alert('Please enter a book title 📖'); return; }
   const capsule = { title, thought: document.getElementById('f-thought').value.trim(),
-    question: document.getElementById('f-question').value.trim(),
-    matter: document.getElementById('f-matter').value.trim(),
+    felt: document.getElementById('f-felt').value.trim(),
+    good: document.getElementById('f-good').value.trim(),
+    favorite: document.getElementById('f-favorite').value.trim(),
     stars: formStarRating, createdAt: Date.now() };
   const capsules = loadCapsules();
   capsules.unshift(capsule);

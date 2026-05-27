@@ -205,13 +205,14 @@ Rules:
 - After 5-7 meaningful exchanges (once you know the book title and at least 2 good reflections), naturally wrap up. Say something like "I think I have enough to weave your memory capsule now 🌸 Let me put it together..." then output a JSON block.
 
 The JSON must be the LAST thing in your message, formatted EXACTLY like this with no markdown fences:
-CAPSULE_JSON:{"title":"...","thought":"...","question":"...","matter":"..."}
+CAPSULE_JSON:{"title":"...","thought":"...","felt":"...","good":"...","favorite":"..."}
 
 Rules for JSON fields:
 - title: the book title
-- thought: synthesize the user's feelings/impressions in first person (2-3 sentences, e.g. "I felt moved by...")
-- question: the lingering question the book left them with
-- matter: why this book mattered personally
+- thought: synthesize what the user thought about the book in first person (2-3 sentences)
+- felt: what emotions the book brought out in them
+- good: what was good or not so good about the book
+- favorite: their favorite character(s) or moment
 
 Do NOT output the JSON until you have enough content. Keep chatting until then.`;
 
@@ -334,7 +335,7 @@ function generateReflectionPreview() {
 function sealFromChat() {
   const d = chatCollectedData;
   const capsule = { title: d.title || 'My Book', thought: d.thought || '',
-    question: d.question || '', matter: d.matter || '',
+    felt: d.felt || '', good: d.good || '', favorite: d.favorite || '',
     stars: chatStarRating, createdAt: Date.now() };
   const capsules = loadCapsules();
   capsules.unshift(capsule);
